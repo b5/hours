@@ -1,0 +1,22 @@
+{
+  "name": "hours",
+  "version": "0.0.1",
+  "description": "implementation of schema.org openingHours: https://schema.org/openingHours. covers 'hours of operation' style spec\"",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "hours",
+    "operating",
+    "hours",
+    "opening",
+    "hours",
+    "openingHours"
+  ],
+  "author": "Brendan O'Brien",
+  "license": "ISC"
+}
