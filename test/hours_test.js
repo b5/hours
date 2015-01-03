@@ -54,13 +54,23 @@ describe("Hours", function () {
 		}
 	});
 
-	it('intersects', function () {
+	it.only('intersects', function () {
 		var tomorrow = new Date();
 		tomorrow.setDate(tomorrow.getDate() + 1);
 
 		var cases = [
 			{ start : new Date(), stop : tomorrow, hours : ["Su-Sa"], outcome : true },
-			{ start : Hours.relativeDate("Mon", 0, 0), stop : Hours.relativeDate("Mon", 18,00), hours : ["Tu-Th"], outcome : false }
+			{ start : Hours.relativeDate("Mon", 0, 0), stop : Hours.relativeDate("Mon", 18,00), hours : ["Tu-Th"], outcome : false },
+			{ start : new Date("Sat Jan 03 2015 00:00:00 GMT-0500 (EST)"),
+				stop : new Date("Sat Jan 03 2015 23:59:59 GMT-0500 (EST)"), 
+				hours : ["Tu 7:30-20:00", "We 7:30-20:00", "Th 7:30-20:00", "Fr 7:30-20:00", "Sa 8:30-21:00", "Su 8:30-21:00"], 
+				outcome : true
+			},
+			{ start : new Date("Sat Jan 03 2015 00:00:00 GMT-0500 (EST)"),
+				stop : new Date("Sat Jan 03 2015 23:59:59 GMT-0500 (EST)"), 
+				hours : ["Tu-Sa 7:30-20:00"], 
+				outcome : true
+			}
 		];
 
 		for (var i=0, testCase; testCase= cases[i]; i++) {
@@ -70,6 +80,17 @@ describe("Hours", function () {
 				, hours = testCase.hours;
 
 			assert.equal(outcome, Hours.intersects(start, stop, hours), "intersets test case " + i + " : " + outcome + " != " + Hours.intersects(start, stop, hours));
+		}
+	});
+
+	it('toString', function () {
+		var cases = {
+			// "Thursday to Saturday, 9:00am-5:00pm" : ["Th-Sa 9:00-17:00"]
+		}
+
+		for (var testCase in cases) {
+			outcome = cases[testCase];
+			assert.equal(outcome, Hours.toString(testCase), "toString fail: " + testCase + " : " + outcome + " != " + Hours.toString(testCase));
 		}
 	});
 });

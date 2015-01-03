@@ -76,14 +76,15 @@ module.exports = Hours = {
 						}
 
 						var end = ParseHour(hrSplit[1])
-						var start = ParseHour(hrSplit[0])
+						var start = ParseHour(hrSplit[0]);
+
 						// big 'ol if. If the span start is before the opening end AND
 						// the span end is after the opening start, we're interseting
 						// basically just cross the start / ends & make sure they're on
 						// the correct side of each other
 						if ( 
 								 (span[0].getHours() < end.hr || (span[0].getHours() == end.hr && span[0].getMinutes() < end.min)) &&
-								 (span[0].getHours() > start.hr || (span[1].getHours() == start.hr && span[1].getMinutes() > start.min) )
+								 (span[1].getHours() > start.hr || (span[1].getHours() == start.hr && span[1].getMinutes() > start.min) )
 								)  {
 							return true;
 						}
@@ -97,13 +98,17 @@ module.exports = Hours = {
 		}
 
 		return false;
+	},
+	// takes an array of hours & turns it into an array of
+	// human-readable string representations
+	toString : function (hours) {
+
 	}
 }; 
 
 function containsDay(date, dayPhase) {
 	var day = DayNum(date)
 		, days = dayPhase.split(","); // split days on commas
-
 
 	for (var i=0, d; d=days[i]; i++) {
 		// check for ranges
@@ -116,7 +121,7 @@ function containsDay(date, dayPhase) {
 				return true
 			}
 		} else {
-			if (day == DayNum(d)) {
+			if (day == DayNameNum(d)) {
 				return true
 			}
 		}
@@ -211,4 +216,24 @@ function SpanDays(span) {
 			return spans;
 		}
 	}
+}
+
+
+// String Conversion
+var longDayNames = {
+	"Su" : "Sunday",
+	"Mo" : "Monday",
+	"Tu" : "Tuesday",
+	"We" : "Wednesday",
+	"Th" : "Thursday",
+	"Fr" : "Friday",
+	"Sa" : "Saturday"
+}
+
+function openingToString (opening) {
+
+}
+
+function timeToString () {
+
 }
