@@ -54,7 +54,7 @@ describe("Hours", function () {
 		}
 	});
 
-	it.only('intersects', function () {
+	it('intersects', function () {
 		var tomorrow = new Date();
 		tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -85,12 +85,12 @@ describe("Hours", function () {
 
 	it('toString', function () {
 		var cases = {
-			// "Thursday to Saturday, 9:00am-5:00pm" : ["Th-Sa 9:00-17:00"]
+			"Thursday-Saturday, 9:00am-5:00pm" : ["Th-Sa 9:00-17:00"]
 		}
 
-		for (var testCase in cases) {
-			outcome = cases[testCase];
-			assert.equal(outcome, Hours.toString(testCase), "toString fail: " + testCase + " : " + outcome + " != " + Hours.toString(testCase));
+		for (var outcome in cases) {
+			hours = cases[outcome];
+			assert.equal(outcome, Hours.toString(hours), "toString fail: " + outcome + " : " + outcome + " != " + Hours.toString(hours));
 		}
 	});
 });

@@ -99,10 +99,16 @@ module.exports = Hours = {
 
 		return false;
 	},
+
 	// takes an array of hours & turns it into an array of
 	// human-readable string representations
 	toString : function (hours) {
+		var results = [];
+		for (var i=0,o; o=hours[i]; i++) {
+			results.push(openingToString(o));
+		}
 
+		return results;
 	}
 }; 
 
@@ -231,9 +237,62 @@ var longDayNames = {
 }
 
 function openingToString (opening) {
+	var split = opening.split(" ")
+		, days = split[0]
+		, hours;
 
+	days = daysToString(days)
+
+	if (split.length > 1) {
+		hours = hoursToString(split[1]);
+		return days + ", " + hours;
+	} else {
+		return days
+	}
 }
 
-function timeToString () {
+function daysToString(dayPhase) {
+	var split = dayPhase.split(",")
+		, results = ""
+		, name;
 
+	for (var i=0,p; p=split[i]; i++) {
+		// check for range
+		if (~p.indexOf("-")) {
+			name = longDayNames[p.split("-")[0]] + "-" + longDayNames[p.split("-")[1]]
+			if (name) {
+				results += (i > 0) ? ", " + name : name;
+			}
+		} else {
+			name = longDayNames[p];
+			if (name) {
+				results += (i > 0) ? ", " + name : name;
+			}
+		}
+	}
+
+	return results;
+}
+
+function hoursToString (hourPhase) {
+	// if (hourPhase.indexOf("-")) { return ""; }
+	
+	var split = hourPhase.split("-")
+		, start = timeToString(ParseHour(split[0]))
+		, end =  timeToString(ParseHour(split[1]))
+
+	return start + "-" + end;
+}
+
+function timeToString (time) {
+	if (time.hr > 12) {
+		time.hr = time.hr - 12;
+		time.phase = "pm";
+	} else {
+		time.phase = "am";
+	}
+
+	if (time.min < 9) { time.min = "0" + time.min; }
+
+	return time.hr + ":" + time.min + time.phase;
 }
