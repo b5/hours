@@ -30,20 +30,22 @@ module.exports = Hours = {
 			return new Date();
 		}
 
-		// set the date to more than one week in advance.
-		date.setDate(date.getDate() + 7);
+		// create a date to more than one week in advance
+		// that will encapsulate all matches 
+		var startDate = new Date(date);
+		startDate.setDate(startDate.getDate() + 8);
 
 		for (var i=0,o; o=hours[i]; i++) {
-			var d = earliestOpening(o);
+			var d = earliestOpening(o, date);
 			if (d) {
-				if (d.valueOf() < date.valueOf()) {
-					date = d;
+				if (d.valueOf() < startDate.valueOf() && d.valueOf() > date.valueOf()) {
+					startDate = d;
 					set = true;
 				}
 			}
 		}
 
-		return (set) ? date : false;
+		return (set) ? startDate : false;
 	},
 	validate : function (opening) {
 		var r = opening.replace(/[MoTuWehFrSa\s0123456789,:-]*/g,"")
@@ -71,9 +73,14 @@ module.exports = Hours = {
 	relativeDate : function (weekday, hours, minutes) {
 		var date = new Date()
 			, dayNum = jsDaysOfWeek[date.toString().split(' ')[0]]
-			, weekdayNum = jsDaysOfWeek[weekday];
+			, weekdayNum = jsDaysOfWeek[weekday]
+			, daysAdd = (weekdayNum - dayNum);
 
-		date.setDate(date.getDate() + (weekdayNum - dayNum));
+		if (daysAdd < 0) {
+			daysAdd = daysAdd + 7;
+		}
+
+		date.setDate(date.getDate() + daysAdd);
 		date.setHours(hours);
 		date.setMinutes(minutes);
 		date.setSeconds(0);
@@ -324,11 +331,11 @@ function timeToString (time) {
 	return time.hr + ":" + time.min + time.phase;
 }
 
-function earliestOpening (opening) {
+function earliestOpening (opening, date) {
+	date || (date = new Date())
 	var split = opening.split(" ")
 		, hours = split[0]
-		, day = 7
-		, date;
+		, day = 7;
 
 	// get the earliest day
 	hours.split(',').forEach(function(hr){
@@ -344,8 +351,15 @@ function earliestOpening (opening) {
 
 	// Deal with hours
 	if (split.length === 2) {
-		var startT = ParseHour(split[1].split("-")[0]);
-		return Hours.relativeDate(jsDayNums[day],startT.hr,startT.min);
+		var startT = ParseHour(split[1].split("-")[0])
+			, start = Hours.relativeDate(jsDayNums[day],startT.hr,startT.min);
+
+		// if the time is earlier, we need to advance by one week
+		if (start.valueOf() < date.valueOf()) {
+			start.setDate(start.getDate() + 7);
+		}
+		
+		return start;
 	} else {
 		return Hours.relativeDate(jsDayNums[day],0,0);
 	}

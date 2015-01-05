@@ -46,6 +46,9 @@ describe("Hours", function () {
 	});
 
 	it('nextOpen', function () {
+		var nextMonday = Hours.relativeDate("Mon",10,30);
+		nextMonday.setDate(nextMonday.getDate() + 7);
+
 		var cases = [
 			{	date : Hours.relativeDate("Mon", 4, 00),
 			  hours : ["Tu-We 17:00-22:00"], 
@@ -53,6 +56,13 @@ describe("Hours", function () {
 			{	date : Hours.relativeDate("Wed", 4, 00),
 			  hours : ["Sa,Fr 9:00-11:00"], 
 			  outcome : Hours.relativeDate("Fri",9,00) },
+			{ date : Hours.relativeDate("Mon",11,25),
+				hours : ["Su 10:00-11:00"],
+				outcome : Hours.relativeDate("Sun", 10,00) },
+			{ date : Hours.relativeDate("Mon", 11, 30),
+				hours : ["Mo 10:30-11:15"],
+				outcome : nextMonday
+			}
 		]
 
 		for (var i=0, test; test=cases[i]; i++) {
