@@ -1,14 +1,15 @@
 var days = ["Su","Mo","Tu","We","Th","Fr","Sa"]
 	, dayNames = { "Su" : 0,"Mo" : 1,"Tu" : 2,"We" : 3,"Th" : 4,"Fr" : 5,"Sa" : 6 }
- 	, jsDaysOfWeek = { "Sun" : 0, "Mon" : 1, "Tue" : 2, "Wed" : 3, "Thu" : 4, "Fri" : 5, "Sat" : 6 };
+ 	, jsDaysOfWeek = { "Sun" : 0, "Mon" : 1, "Tue" : 2, "Wed" : 3, "Thu" : 4, "Fri" : 5, "Sat" : 6 }
+ 	, jsDayNums = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
 var Hours;
 
 module.exports = Hours = {
 	// takes an array of openings & returns true if any of them contain
 	// the current time
-	openNow : function (hours) {
-		var date = new Date();
+	openNow : function (hours, date) {
+		date || (date = new Date())
 
 		for (var i=0, h; h=hours[i]; i++) {
 			if (Hours.containsDate(h,date)) {
@@ -17,6 +18,32 @@ module.exports = Hours = {
 		}
 
 		return false;
+	},
+
+	// return the earliest opening in relation to @date
+	nextOpen : function (hours, date) {
+		date || (date = new Date())
+		var set = false;
+
+
+		if (this.openNow(hours, date)) {
+			return new Date();
+		}
+
+		// set the date to more than one week in advance.
+		date.setDate(date.getDate() + 7);
+
+		for (var i=0,o; o=hours[i]; i++) {
+			var d = earliestOpening(o);
+			if (d) {
+				if (d.valueOf() < date.valueOf()) {
+					date = d;
+					set = true;
+				}
+			}
+		}
+
+		return (set) ? date : false;
 	},
 	validate : function (opening) {
 		var r = opening.replace(/[MoTuWehFrSa\s0123456789,:-]*/g,"")
@@ -109,7 +136,7 @@ module.exports = Hours = {
 		}
 
 		return results;
-	}
+	},
 }; 
 
 function containsDay(date, dayPhase) {
@@ -295,4 +322,32 @@ function timeToString (time) {
 	if (time.min < 9) { time.min = "0" + time.min; }
 
 	return time.hr + ":" + time.min + time.phase;
+}
+
+function earliestOpening (opening) {
+	var split = opening.split(" ")
+		, hours = split[0]
+		, day = 7
+		, date;
+
+	// get the earliest day
+	hours.split(',').forEach(function(hr){
+		// check for ranges
+		var h = hr.split('-')[0];
+		if (dayNames[h] < day) {
+			day = dayNames[h];
+		}
+	});
+
+	// couldn't find a valid day
+	if (day == 7) { return false; }
+
+	// Deal with hours
+	if (split.length === 2) {
+		var startT = ParseHour(split[1].split("-")[0]);
+		return Hours.relativeDate(jsDayNums[day],startT.hr,startT.min);
+	} else {
+		return Hours.relativeDate(jsDayNums[day],0,0);
+	}
+
 }

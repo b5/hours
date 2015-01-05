@@ -4,8 +4,6 @@ var assert = require('assert')
 var daysObject = { "Sun" : 0, "Mon" : 1, "Tue" : 2, "Wed" : 3, "Thu" : 4, "Fri" : 5, "Sat" : 6 }
 	, daysArray = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-
-
 describe("Hours", function () {
 	it("validate", function () {
 		var cases = {
@@ -18,13 +16,6 @@ describe("Hours", function () {
 		for (var testCase in cases) {
 			var outcome = cases[testCase];
 			assert.equal(outcome, Hours.validate(testCase), testCase + " : " + outcome + " != " + Hours.validate(testCase));
-		}
-
-	});
-
-	it("relativeDate", function () {
-		var cases = {
-
 		}
 
 	});
@@ -52,6 +43,22 @@ describe("Hours", function () {
 				, hours = testCase.hours;
 			assert.equal(outcome, Hours.openNow(hours), testCase + " : " + outcome + " != " + Hours.openNow(hours));
 		}
+	});
+
+	it('nextOpen', function () {
+		var cases = [
+			{	date : Hours.relativeDate("Mon", 4, 00),
+			  hours : ["Tu-We 17:00-22:00"], 
+			  outcome : Hours.relativeDate("Tue",17,00) },
+			{	date : Hours.relativeDate("Wed", 4, 00),
+			  hours : ["Sa,Fr 9:00-11:00"], 
+			  outcome : Hours.relativeDate("Fri",9,00) },
+		]
+
+		for (var i=0, test; test=cases[i]; i++) {
+			assert.equal(test.outcome.valueOf(), Hours.nextOpen(test.hours, test.date).valueOf(), "nextOpen test " + i + ": " + test.outcome.valueOf() + " != " + Hours.nextOpen(test.hours, test.date).valueOf());
+		}
+
 	});
 
 	it('intersects', function () {
