@@ -1,7 +1,16 @@
 var days = ["Su","Mo","Tu","We","Th","Fr","Sa"]
 	, dayNames = { "Su" : 0,"Mo" : 1,"Tu" : 2,"We" : 3,"Th" : 4,"Fr" : 5,"Sa" : 6 }
  	, jsDaysOfWeek = { "Sun" : 0, "Mon" : 1, "Tue" : 2, "Wed" : 3, "Thu" : 4, "Fri" : 5, "Sat" : 6 }
- 	, jsDayNums = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+ 	, jsDayNums = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+ 	, longDayNames = {  "Su" : "Sunday",
+											"Mo" : "Monday",
+											"Tu" : "Tuesday",
+											"We" : "Wednesday",
+											"Th" : "Thursday",
+											"Fr" : "Friday",
+											"Sa" : "Saturday"
+										}
+
 
 var Hours;
 
@@ -59,12 +68,12 @@ module.exports = Hours = {
 
 		var split = opening.split(" ");
 		if (!containsDay(date, split[0])) {
-			return false
+			return false;
 		}
 
 		if (split.length === 2) {
 			if (!containsHour(date, split[1])) {
-				return false
+				return false;
 			}
 		}
 
@@ -153,34 +162,31 @@ module.exports = Hours = {
 	// Takes an opening string & breaks it out into an
 	// object that describes the opening
 	openingObject : function (opening) {
-		var split = opening.split[0]
+		var split = opening.split(" ")
 			, days = daysOpenObject(split[0]);
 
 		// deal with hours
 		if (split.length === 2) {
-
+			hours = hoursOpenObject(split[1]);
+			days.allDay = hours.allDay;
+			days.startHr = hours.startHr;
+			days.startMin = hours.startMin;
+			days.stopHr = hours.stopHr;
+			days.stopMin = hours.stopMin;
 		} else {
 			days.allDay = true;
-			days.startHour = 0;
+			days.startHr = 0;
 			days.startMin = 0;
-			days.stopHour = 24;
+			days.stopHr = 23;
 			days.stopMin = 59;
 		}
 
-		return {
-			Su : false,
-			Mo : false,
-			Tu : false,
-			We : false,
-			Th : false,
-			Fr : false,
-			Sa : false,
-			allDay : false,
-			startHour : 0,
-			startMin : 0,
-			stopHour : 0,
-			stopMin : 0
-		}
+		return days;
+	},
+	openingObjectToString : function (obj) {
+		var days = openingDaysString(obj)
+			, hours = openingHoursString(obj);
+		return (days + " " + hours).trim();
 	}
 }; 
 
@@ -298,16 +304,6 @@ function SpanDays(span) {
 
 
 // String Conversion
-var longDayNames = {
-	"Su" : "Sunday",
-	"Mo" : "Monday",
-	"Tu" : "Tuesday",
-	"We" : "Wednesday",
-	"Th" : "Thursday",
-	"Fr" : "Friday",
-	"Sa" : "Saturday"
-}
-
 function openingToString (opening) {
 	var split = opening.split(" ")
 		, days = split[0]
@@ -405,5 +401,105 @@ function earliestOpening (opening, date) {
 }
 
 function daysOpenObject(dayPhase) {
-	
+	var strings = dayPhase.split(",")
+		, obj = {
+			Su : false,
+			Mo : false,
+			Tu : false,
+			We : false,
+			Th : false,
+			Fr : false,
+			Sa : false,
+		};
+
+	for (var i=0, d, r; r=strings[i]; i++) {
+		d = r.split("-");
+		// day range
+		if (d.length === 2) {
+			var start = dayNames[d[0]]
+				, end = dayNames[d[1]];
+
+			for (var i=start; i <= end; i++) {
+				obj[days[i]] = true;
+			}
+		} else {
+			// single day
+			obj[d[0]] = true;
+		}
+	}
+
+	return obj;
+}
+
+function hoursOpenObject(hourPhase) {
+	var split = hourPhase.split('-');
+
+	if (hourPhase == "") {
+		return {
+			allDay : true,
+			startHr : 0,
+			startMin : 0,
+			stopHr : 23,
+			stopMin : 59
+		}
+	} else if (split.length > 1) {
+		var start = ParseHour(split[0])
+			, stop = ParseHour(split[1]);
+
+		return {
+			allDay : false,
+			startHr : start.hr,
+			startMin : start.min,
+			stopHr : stop.hr,
+			stopMin : stop.min
+		};
+	}
+}
+
+function openingDaysString(obj) {
+	var days = ["Su","Mo","Tu","We","Th","Fr","Sa"]
+			, out = ""
+			, current = false
+			, numPushed = 0
+
+		for (var i=0,d; d=days[i]; i++) {
+			if (obj[d]) {
+				// if we're the last day
+				if (i == (days.length - 1)) {
+					if (current == days[i]) {
+						// means no span of days
+						out = (numPushed === 0) ? current : "," + current;
+					} else {
+						current = current + "-" + days[i];
+						out = (numPushed === 0) ? out + current : out + "," + current;
+					}
+				} else if (!current) {
+					current = d;
+				}
+			} else if (current) {
+				if (current == days[i-1]) {
+					// means no span of days
+					out += (numPushed === 0) ? current : "," + current;
+				} else {
+					current = current + "-" + days[i-1];
+					out += (numPushed === 0) ? current : "," + current;
+				}
+
+				numPushed++;
+				current = false;
+			}
+		}
+
+		return out;
+}
+
+function openingHoursString(obj) {
+	if (obj.allDay) {
+		return "";
+	}
+
+	var startMin = (obj.startMin > 10) ? obj.startMin : "0" + obj.startMin
+		, stopMin = (obj.stopMin > 10) ? obj.stopMin : "0" + obj.stopMin
+
+	return obj.startHr + ":" + startMin + "-" + obj.stopHr + ":" + stopMin;
 }

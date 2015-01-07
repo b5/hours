@@ -50,15 +50,15 @@ describe("Hours", function () {
 		nextMonday.setDate(nextMonday.getDate() + 7);
 
 		var cases = [
-			{	date : Hours.relativeDate("Mon", 4, 00),
-			  hours : ["Tu-We 17:00-22:00"], 
-			  outcome : Hours.relativeDate("Tue",17,00) },
-			{	date : Hours.relativeDate("Wed", 4, 00),
-			  hours : ["Sa,Fr 9:00-11:00"], 
-			  outcome : Hours.relativeDate("Fri",9,00) },
-			{ date : Hours.relativeDate("Mon",11,25),
-				hours : ["Su 10:00-11:00"],
-				outcome : Hours.relativeDate("Sun", 10,00) },
+			// {	date : Hours.relativeDate("Mon", 4, 00),
+			//   hours : ["Tu-We 17:00-22:00"], 
+			//   outcome : Hours.relativeDate("Tue",17,00) },
+			// {	date : Hours.relativeDate("Wed", 4, 00),
+			//   hours : ["Sa,Fr 9:00-11:00"], 
+			//   outcome : Hours.relativeDate("Fri",9,00) },
+			// { date : Hours.relativeDate("Mon",11,25),
+			// 	hours : ["Su 10:00-11:00"],
+			// 	outcome : Hours.relativeDate("Sun", 10,00) },
 			{ date : Hours.relativeDate("Mon", 11, 30),
 				hours : ["Mo 10:30-11:15"],
 				outcome : nextMonday
@@ -108,6 +108,38 @@ describe("Hours", function () {
 		for (var outcome in cases) {
 			hours = cases[outcome];
 			assert.equal(outcome, Hours.toString(hours), "toString fail: " + outcome + " : " + outcome + " != " + Hours.toString(hours));
+		}
+	});
+
+	it("openingObject", function () {
+		var cases = {
+			"Mo-Fr" : { Su : false, Mo : true, Tu : true, We : true, Th : true, Fr : true, Sa : false, allDay : true, startHr : 0, startMin : 0, stopHr : 23, stopMin : 59 },
+			"Mo-Fr 9:00-17:00" : { Su : false, Mo : true, Tu : true, We : true, Th : true, Fr : true, Sa : false, allDay : false, startHr : 9, startMin : 0, stopHr : 17, stopMin : 0 }
+		};
+
+		for (var input in cases) {
+			var outcome = cases[input]
+				, test = Hours.openingObject(input);
+
+			for (var key in test) {
+				assert.equal(test[key], outcome[key], "openingObject fail: " + input + " : " + key + " : " + outcome[key] + " != " + test[key]  );
+			}
+		}
+	});
+
+	it("openingObjectToString", function () {
+		var cases = {
+			"Mo-Fr" : { Su : false, Mo : true, Tu : true, We : true, Th : true, Fr : true, Sa : false, allDay : true, startHr : 0, startMin : 0, stopHr : 23, stopMin : 59 },
+			"Mo-Fr 9:00-17:00" : { Su : false, Mo : true, Tu : true, We : true, Th : true, Fr : true, Sa : false, allDay : false, startHr : 9, startMin : 0, stopHr : 17, stopMin : 0 },
+			"Mo,We-Sa 10:47-22:11" : { Su : false, Mo : true, Tu : false, We : true, Th : true, Fr : true, Sa : true, allDay : false, startHr : 10, startMin : 47, stopHr : 22, stopMin : 11 },
+			"Mo,We,Fr-Sa 10:47-22:11" : { Su : false, Mo : true, Tu : false, We : true, Th : false, Fr : true, Sa : true, allDay : false, startHr : 10, startMin : 47, stopHr : 22, stopMin : 11 }
+		}
+
+		for (var outcome in cases) {
+			var input = cases[outcome]
+				, result = Hours.openingObjectToString(input);
+
+			assert.equal(result, outcome, "openingObjectToString fail: " + result + " != " + outcome);
 		}
 	});
 });
