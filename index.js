@@ -144,6 +144,44 @@ module.exports = Hours = {
 
 		return results;
 	},
+
+	// Takes hours & breaks it out into an array of
+	// objects that describe the opening
+	hoursObject : function (hours) {
+
+	},
+	// Takes an opening string & breaks it out into an
+	// object that describes the opening
+	openingObject : function (opening) {
+		var split = opening.split[0]
+			, days = daysOpenObject(split[0]);
+
+		// deal with hours
+		if (split.length === 2) {
+
+		} else {
+			days.allDay = true;
+			days.startHour = 0;
+			days.startMin = 0;
+			days.stopHour = 24;
+			days.stopMin = 59;
+		}
+
+		return {
+			Su : false,
+			Mo : false,
+			Tu : false,
+			We : false,
+			Th : false,
+			Fr : false,
+			Sa : false,
+			allDay : false,
+			startHour : 0,
+			startMin : 0,
+			stopHour : 0,
+			stopMin : 0
+		}
+	}
 }; 
 
 function containsDay(date, dayPhase) {
@@ -364,4 +402,8 @@ function earliestOpening (opening, date) {
 		return Hours.relativeDate(jsDayNums[day],0,0);
 	}
 
+}
+
+function daysOpenObject(dayPhase) {
+	
 }
